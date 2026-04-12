@@ -1,0 +1,13 @@
+{
+  "wmape_lgb_p50": 0.36547535948804094,
+  "wmape_naive_seasonal": 0.620718594282717,
+  "wmape_classical_ets_style": 0.37643259900340936,
+  "wmape_ensemble": 0.3864432345120821,
+  "ensemble_weight_lgb": 0.39067282757608124,
+  "ensemble_weight_naive": 0.23002606021870317,
+  "ensemble_weight_classical": 0.37930111220521556,
+  "ensemble_weight_torch": 0.0,
+  "calibration_p10_p90_coverage": 0.7161111111111111,
+  "hierarchical_coherence_mape_gap": 0.0,
+  "duckdb_warehouse": "C:\\Users\\HP\\Desktop\\Runtime-terrors\\output\\forecast_warehouse.duckdb"
+}
