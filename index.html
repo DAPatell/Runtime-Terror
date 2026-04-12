@@ -3,103 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DemandForecaster AI - Supply Chain Resilience</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/style.css">
+    <title>NexChain | Advanced Forecasting</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="ui/style.css">
 </head>
 <body>
-    <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <a href="index.html" class="logo">DemandForecaster AI</a>
-            <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link active">Home</a></li>
-                <li><a href="features.html" class="nav-link">Features</a></li>
-                <li><a href="demo.html" class="nav-link">Demo</a></li>
-                <li><a href="about.html" class="nav-link">About</a></li>
-                <li><a href="pricing.html" class="nav-link">Pricing</a></li>
-                <li><a href="contact.html" class="nav-link">Contact</a></li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
+    <div class="app-layout">
+        <aside class="sidebar glass-panel">
+            <div class="logo-container">
+                <div class="logo-icon">NC</div>
+                <h2>NexChain</h2>
             </div>
-        </div>
-    </nav>
+            
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Dashboard
+                </button>
+                <button class="nav-btn" data-tab="planner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Planner & Scenarios
+                </button>
+                <button class="nav-btn" data-tab="hierarchy">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    State Hierarchy
+                </button>
+                <button class="nav-btn" data-tab="evaluation">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Evaluation Overview
+                </button>
+            </nav>
+        </aside>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="fade-in">Predictive Demand Forecasting<br>for Supply Chain Resilience</h1>
-            <p class="fade-in">Harness multi-source time-series data with advanced AI models to achieve 95%+ forecast accuracy</p>
-            <div class="cta-buttons">
-                <a href="demo.html" class="btn btn-primary fade-in">
-                    <i class="fas fa-rocket"></i> Live Demo
-                </a>
-                <a href="features.html" class="btn btn-secondary fade-in">
-                    <i class="fas fa-chart-line"></i> Features
-                </a>
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-container glass-panel">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="global-search" placeholder="Search State, Store, or SKU..." autocomplete="off">
+                </div>
+                <div class="search-results hidden" id="search-results"></div>
+                <div class="user-profile">
+                    <span class="user-avatar">SC</span>
+                    <span>Supply Planner</span>
+                </div>
+            </header>
+
+            <div class="view-container">
+                <!-- Dashboard Tab -->
+                <section id="tab-dashboard" class="tab-content active transition-fade">
+                    <div class="metric-grid" id="metrics-container">
+                        <!-- Metrics injected here -->
+                    </div>
+                    
+                    <div class="chart-card glass-panel fade-in-up" style="animation-delay: 0.1s">
+                        <div class="chart-header">
+                            <h3>National Demand Aggregation</h3>
+                            <button id="refresh-national-btn" class="action-btn">Refresh</button>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="nationalChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Planner Tab -->
+                <section id="tab-planner" class="tab-content transition-fade style-hidden">
+                    <div class="planner-layout">
+                        <div class="scenario-panel glass-panel">
+                            <h3>Scenario Levers</h3>
+                            <div class="selected-sku-indicator" id="selected-sku-display">No SKU Selected</div>
+                            
+                            <div class="slider-group">
+                                <label for="port-weeks">Port Disruption (Weeks) <span id="val-port-weeks">0</span></label>
+                                <input type="range" id="port-weeks" min="0" max="12" step="1" value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <label for="port-sec">Disruption Depth <span id="val-port-sec">0.25</span></label>
+                                <input type="range" id="port-sec" min="0" max="0.7" step="0.01" value="0.25">
+                            </div>
+
+                            <div class="slider-group">
+                                <label for="price-pct">Price Change % <span id="val-price-pct">0</span></label>
+                                <input type="range" id="price-pct" min="-40" max="40" step="0.5" value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <label for="promo-lift">Competitor Promo <span id="val-promo-lift">0</span></label>
+                                <input type="range" id="promo-lift" min="0" max="0.4" step="0.01" value="0">
+                            </div>
+                            
+                            <button id="apply-scenario-btn" class="primary-btn pulse-glow">Apply & Simulate</button>
+                        </div>
+                        
+                        <div class="planner-charts direction-column">
+                            <div class="chart-card glass-panel h-50">
+                                <div class="chart-header">
+                                    <h3>Probabilistic Fan Chart (Forward Scenario)</h3>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="scenarioChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-card glass-panel h-50 mt-4">
+                                <div class="chart-header">
+                                    <h3>Holdout Window History</h3>
+                                </div>
+                                <div class="chart-body">
+                                    <canvas id="historyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Hierarchy Tab -->
+                <section id="tab-hierarchy" class="tab-content transition-fade style-hidden">
+                    <div class="chart-card glass-panel fade-in-up">
+                        <div class="chart-header flex-between">
+                            <h3>State Roll-Ups (Validation)</h3>
+                        </div>
+                        <div class="chart-body large-chart">
+                            <canvas id="stateChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Evaluation Tab -->
+                <section id="tab-evaluation" class="tab-content transition-fade style-hidden">
+                    <div class="planner-charts direction-column">
+                        <div class="chart-card glass-panel h-50">
+                            <div class="chart-header">
+                                <h3>Temperature vs Sales Demand</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="weatherChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card glass-panel h-50 mt-4">
+                            <div class="chart-header">
+                                <h3>Price Elasticity Analysis (Sales vs Price)</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="priceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </div>
-    </section>
-
-    <section class="stats-hero">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item fade-in">
-                    <div class="stat-number">95.2%</div>
-                    <div>Forecast Accuracy</div>
-                </div>
-                <div class="stat-item fade-in">
-                    <div class="stat-number">87%</div>
-                    <div>Inventory Reduction</div>
-                </div>
-                <div class="stat-item fade-in">
-                    <div class="stat-number">3.2x</div>
-                    <div>ROI Improvement</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to transform your supply chain?</h2>
-            <p>Get started with our 14-day free trial</p>
-            <a href="pricing.html" class="btn btn-primary btn-large">Start Free Trial</a>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>DemandForecaster AI</h3>
-                    <p>Revolutionizing supply chain management with predictive analytics</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Product</h3>
-                    <ul>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="demo.html">Demo</a></li>
-                        <li><a href="pricing.html">Pricing</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Company</h3>
-                    <ul>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="technology.html">Technology</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 DemandForecaster AI. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="assets/script.js"></script>
+        </main>
+    </div>
+    <script src="ui/app.js"></script>
 </body>
 </html>
