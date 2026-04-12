@@ -1,152 +1,95 @@
-import pandas as pd
-import numpy as np
 import os
+from pathlib import Path
+
+import pandas as pd
+
+from src.externals import attach_external_signals
 
 
-# -----------------------------
-# LOAD DATA
-# -----------------------------
-def load_data(data_path="data/"):
-    sales = pd.read_csv(os.path.join(data_path, "sales_train.csv"))
-    calendar = pd.read_csv(os.path.join(data_path, "calendar.csv"))
-    prices = pd.read_csv(os.path.join(data_path, "sell_prices.csv"))
-
+def load_data(data_path: str | Path = "data"):
+    root = Path(data_path)
+    sales = pd.read_csv(root / "sales_train.csv")
+    calendar = pd.read_csv(root / "calendar.csv")
+    prices = pd.read_csv(root / "sell_prices.csv")
     return sales, calendar, prices
 
 
-# -----------------------------
-# MELT SALES DATA
-# -----------------------------
 def melt_sales(sales):
-    sales_long = sales.melt(
-        id_vars=['id', 'item_id', 'store_id', 'state_id'],
-        var_name='d',
-        value_name='sales'
-    )
-    return sales_long
+    meta = ["id", "item_id", "dept_id", "cat_id", "store_id", "state_id"]
+    meta = [c for c in meta if c in sales.columns]
+    return sales.melt(id_vars=meta, var_name="d", value_name="sales")
 
 
-# -----------------------------
-# MERGE DATA
-# -----------------------------
 def merge_data(sales_long, calendar, prices):
-    df = sales_long.merge(calendar, on='d', how='left')
-    df = df.merge(prices, on=['store_id', 'item_id', 'wm_yr_wk'], how='left')
+    df = sales_long.merge(calendar, on="d", how="left")
+    df = df.merge(prices, on=["store_id", "item_id", "wm_yr_wk"], how="left")
     return df
 
 
-# -----------------------------
-# FEATURE ENGINEERING
-# -----------------------------
 def create_features(df):
+    df["sales"] = pd.to_numeric(df["sales"], errors="coerce")
+    df["sell_price"] = pd.to_numeric(df["sell_price"], errors="coerce")
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df = df.sort_values(["id", "date"])
 
-    print("👉 Running NEW CLEAN FEATURE CODE")
-
-    # Fix data types
-    df['sales'] = pd.to_numeric(df['sales'], errors='coerce')
-    df['sell_price'] = pd.to_numeric(df['sell_price'], errors='coerce')
-    df['date'] = pd.to_datetime(df['date'], errors='coerce')
-
-    # Sort (VERY IMPORTANT)
-    df = df.sort_values(['id', 'date'])
-
-    # -------------------------
-    # LAG FEATURES
-    # -------------------------
-    df['lag_7'] = df.groupby('id')['sales'].shift(7)
-    df['lag_28'] = df.groupby('id')['sales'].shift(28)
-
-    # -------------------------
-    # ROLLING FEATURES (SAFE)
-    # -------------------------
-    df['rmean_7'] = (
-        df.groupby('id')['sales']
-        .transform(lambda x: x.shift(7).rolling(7).mean())
+    df["lag_7"] = df.groupby("id")["sales"].shift(7)
+    df["lag_28"] = df.groupby("id")["sales"].shift(28)
+    df["rmean_7"] = df.groupby("id")["sales"].transform(
+        lambda x: x.shift(7).rolling(7).mean()
+    )
+    df["rmean_28"] = df.groupby("id")["sales"].transform(
+        lambda x: x.shift(28).rolling(28).mean()
     )
 
-    df['rmean_28'] = (
-        df.groupby('id')['sales']
-        .transform(lambda x: x.shift(28).rolling(28).mean())
+    df["day"] = df["date"].dt.day
+    df["month"] = df["date"].dt.month
+    df["week"] = df["date"].dt.isocalendar().week.astype("Int64")
+    df["weekday"] = df["date"].dt.weekday
+
+    df["price_change"] = df.groupby("id")["sell_price"].pct_change()
+    df["price_norm"] = df["sell_price"] / df.groupby("id")["sell_price"].transform("mean")
+    df["event"] = df["event_name_1"].notna().astype(int)
+
+    df["week_start"] = df["date"] - pd.to_timedelta(df["date"].dt.weekday, unit="D")
+    df = attach_external_signals(df)
+    df["weather_temp"] = df["weather_temp_c"]
+    df["trend_index"] = df["social_trend_index"]
+    df = df.drop(
+        columns=[c for c in ("iso_year", "iso_week") if c in df.columns],
+        errors="ignore",
     )
-
-    # -------------------------
-    # DATE FEATURES
-    # -------------------------
-    df['day'] = df['date'].dt.day
-    df['month'] = df['date'].dt.month
-
-    # SAFE week conversion
-    df['week'] = df['date'].dt.isocalendar().week
-    df['week'] = df['week'].astype('Int64')  # nullable int
-
-    df['weekday'] = df['date'].dt.weekday
-
-    # -------------------------
-    # PRICE FEATURES
-    # -------------------------
-    df['price_change'] = df.groupby('id')['sell_price'].pct_change()
-    df['price_norm'] = df['sell_price'] / df.groupby('id')['sell_price'].transform('mean')
-
-    # -------------------------
-    # EVENT FEATURE
-    # -------------------------
-    df['event'] = df['event_name_1'].notnull().astype(int)
-
-    # -------------------------
-    # EXTERNAL FEATURES
-    # -------------------------
-    df['weather_temp'] = np.random.normal(25, 5, len(df))
-    df['trend_index'] = np.random.randint(0, 100, len(df))
 
     return df
 
 
-# -----------------------------
-# CLEAN DATA
-# -----------------------------
 def clean_data(df):
-
     df = df.dropna()
-
-    df['sales'] = df['sales'].astype('float32')
-    df['sell_price'] = df['sell_price'].astype('float32')
-
+    df["sales"] = df["sales"].astype("float32")
+    df["sell_price"] = df["sell_price"].astype("float32")
     return df
 
 
-# -----------------------------
-# SAVE DATA
-# -----------------------------
 def save_data(df, output_path="output/final_features.parquet"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_parquet(output_path, index=False)
     print(f"Saved: {output_path}")
 
 
-# -----------------------------
-# MAIN PIPELINE
-# -----------------------------
-def run_pipeline():
-
+def run_pipeline(data_path: str | Path = "data"):
     print(" Starting pipeline...")
-
-    sales, calendar, prices = load_data()
+    sales, calendar, prices = load_data(data_path)
     print("✔ Loaded")
-
     sales_long = melt_sales(sales)
     print("✔ Melted")
-
     df = merge_data(sales_long, calendar, prices)
     print("✔ Merged")
-
     df = create_features(df)
     print("✔ Features created")
-
     df = clean_data(df)
     print("✔ Cleaned")
-
     save_data(df)
-
     print(" DONE SUCCESSFULLY!")
+
+
 if __name__ == "__main__":
     run_pipeline()
