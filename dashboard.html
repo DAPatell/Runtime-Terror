@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetailFlow Analytics - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h2>RetailFlow Analytics</h2>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-store"></i>
+                <span>RetailFlow</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-link active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#sales" class="nav-link" data-page="sales"><i class="fas fa-shopping-cart"></i> Sales</a></li>
+                <li><a href="#forecast" class="nav-link" data-page="forecast"><i class="fas fa-chart-line"></i> Forecast</a></li>
+                <li><a href="#categories" class="nav-link" data-page="categories"><i class="fas fa-tags"></i> Categories</a></li>
+                <li><a href="#stores" class="nav-link" data-page="stores"><i class="fas fa-map-marker-alt"></i> Stores</a></li>
+                <li><a href="#insights" class="nav-link" data-page="insights"><i class="fas fa-lightbulb"></i> Insights</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/40" alt="User" class="user-avatar">
+                <span>John Doe</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <h3><i class="fas fa-chart-bar"></i> Quick Stats</h3>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Today</span>
+                    <span class="stat-value" data-value="45K">$<span>45</span>K</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Week</span>
+                    <span class="stat-value" data-value="320K">$<span>320</span>K</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Month</span>
+                    <span class="stat-value" data-value="1.2M">$<span>1.2</span>M</span>
+                </div>
+            </div>
+            <div class="recent-activity">
+                <h4><i class="fas fa-history"></i> Recent Activity</h4>
+                <div class="activity-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>TX_1: 245 units sold</span>
+                </div>
+                <div class="activity-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Forecast model updated</span>
+                </div>
+                <div class="activity-item">
+                    <i class="fas fa-bell"></i>
+                    <span>New insight generated</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page active">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Real-time retail analytics & M5 forecasting insights</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card revenue">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-content">
+                        <h3 data-target="1.24">$0</h3>
+                        <p>Total Revenue</p>
+                        <span class="stat-change positive">+12.5% <i class="fas fa-arrow-up"></i></span>
+                    </div>
+                </div>
+                <div class="stat-card units">
+                    <div class="stat-icon"><i class="fas fa-box"></i></div>
+                    <div class="stat-content">
+                        <h3 data-target="2.8">0</h3>
+                        <p>Units Sold</p>
+                        <span class="stat-change positive">+8.2% <i class="fas fa-arrow-up"></i></span>
+                    </div>
+                </div>
+                <div class="stat-card stores">
+                    <div class="stat-icon"><i class="fas fa-store"></i></div>
+                    <div class="stat-content">
+                        <h3 data-target="3049">0</h3>
+                        <p>Active Items</p>
+                        <span class="stat-change neutral">0.0%</span>
+                    </div>
+                </div>
+                <div class="stat-card growth">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-content">
+                        <h3 data-target="15.7">0</h3>
+                        <p>YoY Growth</p>
+                        <span class="stat-change positive">Trending Up <i class="fas fa-trending-up"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Sales Trend <span class="chart-period">Last 30 Days</span></h3>
+                    <canvas id="salesTrendChart" height="200"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Top Categories</h3>
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Page -->
+        <section id="sales" class="page">
+            <div class="page-header">
+                <h1>Sales Analysis</h1>
+                <p>Comprehensive sales data across all stores and categories</p>
+            </div>
+            <div class="filters">
+                <select id="storeFilter">
+                    <option>All Stores</option>
+                    <option>CA_1</option>
+                   
